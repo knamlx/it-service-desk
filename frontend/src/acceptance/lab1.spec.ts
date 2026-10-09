@@ -70,7 +70,14 @@ describe('ЛР1: интерфейс заявок', () => {
       button.click();
       fixture.detectChanges();
     };
-    return {fixture, root, cards, click};
+    const search = (value: string) => {
+      const input = root.querySelector<HTMLInputElement>('[data-testid="ticket-search"]');
+      if (!input) throw new Error('Не найдено поле ticket-search');
+      input.value = value;
+      input.dispatchEvent(new Event('input'));
+      fixture.detectChanges();
+    };
+    return {fixture, root, cards, click, search};
   }
   it('показывает данные всех заявок', async () => {
     const {root, cards} = await setup();
@@ -101,6 +108,20 @@ describe('ЛР1: интерфейс заявок', () => {
     const {fixture, root, cards, click} = await setup();
     fixture.componentInstance.tickets.set([DEMO_TICKETS[2]]);
     click('new');
+    expect(cards()).toEqual([]);
+    expect(root.querySelector('[data-testid="empty-state"]')?.textContent).toContain('заявок нет');
+    expect(root.querySelector('[data-testid="ticket-count"]')?.textContent).toContain('0');
+  });
+  it('ищет заявки по заголовку без учёта регистра и пробелов', async () => {
+    const {root, cards, search} = await setup();
+    search('  ПРОЕКТОР  ');
+    expect(cards()).toEqual(['2']);
+    expect(root.querySelector('[data-testid="ticket-count"]')?.textContent).toContain('1');
+  });
+  it('совмещает поиск с выбранным режимом и показывает пустой результат', async () => {
+    const {root, cards, click, search} = await setup();
+    click('new');
+    search('проектор');
     expect(cards()).toEqual([]);
     expect(root.querySelector('[data-testid="empty-state"]')?.textContent).toContain('заявок нет');
     expect(root.querySelector('[data-testid="ticket-count"]')?.textContent).toContain('0');

@@ -6,7 +6,7 @@ export function filterTickets(
   items: readonly Ticket[],
   mode: TicketFilter,
 ): Ticket[] {
-  // TODO(LR1-03): all — все; open — всё, кроме closed; new — только new.
-  // Не меняйте исходный массив и его объекты. Пустой массив — временная заглушка.
-  return [];
+  if (mode === 'all') return [...items];
+  if (mode === 'open') return items.filter(item => item.status !== 'closed');
+  return items.filter(item => item.status === 'new');
 }
